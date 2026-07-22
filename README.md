@@ -39,6 +39,22 @@ server then serves the SPA and API from the same loopback origin.
 An optional `VITE_API_BASE_URL` can be supplied at build time when the frontend
 is hosted separately. Leave it unset for the normal StrToolkit packaging flow.
 
+## Releases
+
+Pushing `main` runs the production build in GitHub Actions. The workflow reads
+the version from `package.json` and creates `v<version>` when that GitHub Release
+does not already exist. Bump the package version before publishing a new release.
+
+Each release contains:
+
+- `json-hero-frontend-v<version>.tar.gz`
+- `json-hero-frontend-v<version>.zip`
+- `SHA256SUMS`
+
+Both archives contain a top-level `jsonhero-frontend/` directory. Extract that
+directory beside the StrToolkit executable; the embedded Kestrel server will
+serve its `index.html` and assets.
+
 ## API contract
 
 - `POST /api/create/file`

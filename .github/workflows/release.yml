@@ -1,0 +1,107 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: json-hero-frontend-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production frontend
+        run: npm run build
+
+      - name: Verify production output
+        shell: bash
+        run: |
+          test -f dist/index.html
+          test -d dist/assets
+
+      - name: Resolve release version
+        id: version
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          TAG="v${VERSION}"
+
+          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+            echo "package.json contains an invalid release version: ${VERSION}" >&2
+            exit 1
+          fi
+
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+
+          if gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "should_release=false" >> "${GITHUB_OUTPUT}"
+            echo "Release ${TAG} already exists; build verification will continue without publishing it again."
+          else
+            echo "should_release=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Package frontend assets
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          mkdir -p package/jsonhero-frontend artifacts
+          cp -R dist/. package/jsonhero-frontend/
+
+          tar -C package -czf "artifacts/json-hero-frontend-${TAG}.tar.gz" jsonhero-frontend
+          (
+            cd package
+            zip -qr "../artifacts/json-hero-frontend-${TAG}.zip" jsonhero-frontend
+          )
+
+          (
+            cd artifacts
+            sha256sum "json-hero-frontend-${TAG}.tar.gz" \
+              "json-hero-frontend-${TAG}.zip" > SHA256SUMS
+          )
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: json-hero-frontend-${{ steps.version.outputs.tag }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.should_release == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          gh release create "${TAG}" \
+            artifacts/json-hero-frontend-${TAG}.tar.gz \
+            artifacts/json-hero-frontend-${TAG}.zip \
+            artifacts/SHA256SUMS \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "JSON Hero Frontend ${TAG}" \
+            --generate-notes
