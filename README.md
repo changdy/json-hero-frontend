@@ -67,4 +67,7 @@ serve its `index.html` and assets.
 - `GET /api/preview/:url`
 - `POST /api/public/create`
 
+The local API supports up to 512 nested object/array levels per JSON document.
+Deeper input is rejected during creation.
+
 Documents disappear when StrToolkit exits. No database or files are used.

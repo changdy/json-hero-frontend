@@ -9,7 +9,7 @@ import { PreviewJsonType } from "./preview.types";
 export function PreviewJson({ preview }: { preview: PreviewJsonType }) {
   const [hovering, setHovering] = useState(false);
   const jsonHeroUrl = new URL(
-    `/actions/createFromUrl?jsonUrl=${encodeURIComponent(preview.url)}`,
+    `/new?url=${encodeURIComponent(preview.url)}`,
     window.location.origin
   );
 
