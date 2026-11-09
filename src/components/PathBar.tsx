@@ -15,6 +15,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { memo, useEffect, useRef, useState } from "react";
 import { useJson } from '~/hooks/useJson';
 import { JSONHeroPath } from '@jsonhero/path';
+import { CopyPathButton } from "./CopyPathButton";
 
 export function PathBar() {
   const [isEditable, setIsEditable] = useState(false);
@@ -78,6 +79,7 @@ export function PathBarText({ selectedNodes, onConfirm }: { selectedNodes: Colum
           }
           style={{ boxShadow: 'none' }}
           type="text"
+          aria-label="JSON path"
           name="title"
           spellCheck="false"
           placeholder="Name your JSON file"
@@ -125,8 +127,10 @@ export function PathBarLink({
           />
         );
       })}
+      <CopyPathButton path={selectedNodes.at(-1)?.id ?? "$"} />
       <button
-        className="flex ml-auto justify-center items-center w-[26px] h-[26px] hover:bg-slate-300 dark:text-slate-400 dark:hover:bg-white dark:hover:bg-opacity-[10%]"
+        aria-label="Edit path"
+        className="flex shrink-0 justify-center items-center w-[26px] h-[26px] hover:bg-slate-300 dark:text-slate-400 dark:hover:bg-white dark:hover:bg-opacity-[10%]"
         onClick={enableEdit}>
         <PencilSquareIcon className='h-5' />
       </button>
