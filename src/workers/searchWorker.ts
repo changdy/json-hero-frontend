@@ -1,6 +1,6 @@
 /// <reference lib="WebWorker" />
 import { JSONHeroSearch } from "@jsonhero/fuzzy-json-search";
-import { inferType } from "@jsonhero/json-infer-types";
+import { inferType } from "~/utilities/jsonTypes";
 import { formatValue } from "~/utilities/formatter";
 
 type SearchWorker = {

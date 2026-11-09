@@ -1,4 +1,4 @@
-import { inferType } from "@jsonhero/json-infer-types";
+import { inferType } from "~/utilities/jsonTypes";
 import { JSONHeroPath } from "@jsonhero/path";
 import { useJson } from "~/hooks/useJson";
 import { useJsonColumnViewState } from "~/hooks/useJsonColumnView";

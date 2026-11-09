@@ -24,7 +24,7 @@ import {
   DocumentTextIcon,
   HashtagIcon,
 } from "@heroicons/react/24/outline";
-import { inferType, JSONValueType } from "@jsonhero/json-infer-types";
+import { inferType, JSONValueType } from "./jsonTypes";
 import { StringIcon } from "~/components/Icons/StringIcon";
 import { IconComponent } from "~/useColumnView";
 

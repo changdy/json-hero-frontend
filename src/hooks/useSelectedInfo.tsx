@@ -1,4 +1,4 @@
-import { inferType, JSONValueType } from "@jsonhero/json-infer-types";
+import { inferType, JSONValueType } from "~/utilities/jsonTypes";
 import { JSONHeroPath } from "@jsonhero/path";
 import { useMemo } from "react";
 import { useJson } from "./useJson";

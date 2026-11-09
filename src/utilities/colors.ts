@@ -1,4 +1,4 @@
-import { inferType } from "@jsonhero/json-infer-types";
+import { inferType } from "./jsonTypes";
 import { JSONHeroPath } from "@jsonhero/path";
 
 export function colorForTypeName(typeName: string): string {

@@ -1,4 +1,4 @@
-import { inferType, JSONValueType } from "@jsonhero/json-infer-types";
+import { inferType, JSONValueType } from "./jsonTypes";
 import { JSONHeroPath, PathComponent } from "@jsonhero/path";
 import { ColumnViewNode } from "~/useColumnView";
 import { formatValue } from "./formatter";

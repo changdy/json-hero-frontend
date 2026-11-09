@@ -1,4 +1,4 @@
-import { inferType } from "@jsonhero/json-infer-types";
+import { inferType } from "./jsonTypes";
 import { JSONHeroPath } from "@jsonhero/path";
 import { groupBy, sortBy } from "lodash-es";
 

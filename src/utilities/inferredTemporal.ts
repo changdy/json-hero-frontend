@@ -1,5 +1,11 @@
 import { Temporal } from "@js-temporal/polyfill";
-import { JSONDateTimeFormat } from "@jsonhero/json-infer-types";
+import type { JSONDateTimeFormat } from "@jsonhero/json-infer-types";
+
+// Compact numeric dates are indistinguishable from IDs. Require an explicit
+// date/time separator before offering calendar formatting or a date preview.
+export function isNumericDateString(value: string): boolean {
+  return /^[+-]?\d+(?:\.\d+)?$/.test(value);
+}
 
 export type InferredTemporal =
   | Temporal.Instant
@@ -12,7 +18,7 @@ export function inferTemporal(
   value: string,
   format: JSONDateTimeFormat
 ): InferredTemporal | undefined {
-  if (format.variant === "rfc2822") {
+  if (format.variant === "rfc2822" || isNumericDateString(value)) {
     return;
   }
 
@@ -44,9 +50,7 @@ export function inferTemporal(
         }
       }
     }
-  } catch (e) {
-    console.error(e);
-
+  } catch {
     return;
   }
 }
