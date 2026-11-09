@@ -1,7 +1,5 @@
 import { json as jsonLang } from "@codemirror/lang-json";
 import {
-  EditorView,
-  TransactionSpec,
   useCodeMirror,
   ViewUpdate,
 } from "@uiw/react-codemirror";
@@ -11,6 +9,7 @@ import { getEditorSetup } from "~/utilities/codeMirrorSetup";
 import { darkTheme, lightTheme } from "~/utilities/codeMirrorTheme";
 import { useTheme } from "./ThemeProvider";
 import { useHotkeys } from "react-hotkeys-hook";
+import { nodeSelectionTransaction } from "~/utilities/editorSelection";
 
 export type CodeEditorProps = {
   content: string;
@@ -19,6 +18,7 @@ export type CodeEditorProps = {
   onChange?: (value: string) => void;
   onUpdate?: (update: ViewUpdate) => void;
   selection?: { start: number; end: number };
+  syncSelection?: boolean;
 };
 
 const languages = {
@@ -33,10 +33,11 @@ const defaultProps: CodeEditorDefaultProps = {
   language: "json",
   readOnly: true,
   selection: { start: 0, end: 0 },
+  syncSelection: true,
 };
 
 export function CodeEditor(opts: CodeEditorProps) {
-  const { content, language, readOnly, onChange, onUpdate, selection } = {
+  const { content, language, readOnly, onChange, onUpdate, selection, syncSelection } = {
     ...defaultProps,
     ...opts,
   };
@@ -51,7 +52,6 @@ export function CodeEditor(opts: CodeEditorProps) {
 
   const editor = useRef(null);
   const { setContainer, view, state } = useCodeMirror({
-    container: editor.current,
     extensions,
     editable: !readOnly,
     contentEditable: !readOnly,
@@ -68,32 +68,18 @@ export function CodeEditor(opts: CodeEditorProps) {
     if (editor.current) {
       setContainer(editor.current);
     }
-  }, [editor.current]);
+  }, [setContainer]);
 
-  const setSelectionRef = useRef(false);
+  const initializedView = useRef<typeof view>(undefined);
 
   useEffect(() => {
-    if (setSelectionRef.current) {
+    if (!view || !selection || (!syncSelection && initializedView.current === view)) {
       return;
     }
-
-    if (view) {
-      setSelectionRef.current = true;
-
-      const selectionStart = selection?.start ?? defaultProps.selection.start;
-      const selectionEnd = selection?.end ?? defaultProps.selection.end;
-
-      const transactionSpec: TransactionSpec = {
-        selection: { anchor: selectionStart, head: selectionEnd },
-        effects: EditorView.scrollIntoView(selectionStart, {
-          y: "start",
-          yMargin: 100,
-        }),
-      };
-
-      view.dispatch(transactionSpec);
-    }
-  }, [selection, view, setSelectionRef.current]);
+    initializedView.current = view;
+    const transaction = nodeSelectionTransaction(view.state, selection);
+    if (transaction) view.dispatch(transaction);
+  }, [selection, syncSelection, view, content]);
 
   const { minimal } = useJsonDoc();
 

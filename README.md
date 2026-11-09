@@ -27,6 +27,8 @@ C# server selected a different port.
 
 ## Production assets
 
+Viewer regression checks run with `npm run test:viewer` (Node.js 22.6+).
+
 ```powershell
 npm ci
 npm run build

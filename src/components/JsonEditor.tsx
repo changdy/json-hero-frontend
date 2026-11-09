@@ -9,10 +9,11 @@ import { ViewUpdate } from "@uiw/react-codemirror";
 import jsonMap from "json-source-map";
 import { JSONHeroPath } from "@jsonhero/path";
 import {usePreferences} from '~/components/PreferencesProvider'
+import { nodeSelection } from "~/utilities/editorSelection";
 
 export function JsonEditor() {
   const [json] = useJson();
-  const { selectedNodeId } = useJsonColumnViewState();
+  const { selectedNodeId, selectedNodeSource } = useJsonColumnViewState();
   const { goToNodeId } = useJsonColumnViewAPI();
   const [preferences] = usePreferences();
 
@@ -43,7 +44,7 @@ export function JsonEditor() {
 
   const onUpdate = useCallback(
     (update: ViewUpdate) => {
-      if (!update.selectionSet) {
+      if (!update.selectionSet || update.transactions.some(t => t.annotation(nodeSelection))) {
         return;
       }
 
@@ -61,7 +62,7 @@ export function JsonEditor() {
 
       // Find the key if the selected line using jsonMapped.pointers
       const pointerEntry = Object.entries(jsonMapped.pointers).find(
-        ([_pointer, info]) => {
+        ([, info]) => {
           return info.value.line === line.number - 1;
         }
       );
@@ -76,7 +77,7 @@ export function JsonEditor() {
 
       goToNodeId(path.toString(), "editor");
     },
-    [goToNodeId]
+    [goToNodeId, jsonMapped]
   );
 
   return (
@@ -86,6 +87,7 @@ export function JsonEditor() {
       readOnly={true}
       onUpdate={onUpdate}
       selection={selection}
+      syncSelection={selectedNodeSource !== "editor"}
     />
   );
 }
