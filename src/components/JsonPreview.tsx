@@ -17,6 +17,7 @@ import { CopyTextButton } from "./CopyTextButton";
 import { useTheme } from "./ThemeProvider";
 import {usePreferences} from '~/components/PreferencesProvider';
 import { useHotkeys } from "react-hotkeys-hook";
+import { compactJson } from "~/utilities/compactJson";
 
 export type JsonPreviewProps = {
   json: unknown;
@@ -112,10 +113,15 @@ export function JsonPreview({ json, highlightPath }: JsonPreviewProps) {
     >
       <div ref={editor} />
       <div
-        className={`absolute top-1 right-0 flex justify-end w-full transition ${
+        className={`absolute top-1 right-0 flex max-w-full flex-wrap justify-end gap-1 transition focus-within:opacity-100 ${
           hovering ? "opacity-100" : "opacity-0"
         }`}
       >
+        <CopyTextButton
+          label="Copy single line"
+          value={() => compactJson(jsonMapped.json)}
+          className="bg-slate-200 hover:bg-slate-300 min-h-6 px-2 py-0.5 rounded-sm transition dark:text-white dark:bg-slate-700 dark:hover:bg-slate-600"
+        />
         <CopyTextButton
           value={jsonMapped.json}
           className="bg-slate-200 hover:bg-slate-300 h-fit mr-1 px-2 py-0.5 rounded-sm transition hover:cursor-pointer dark:text-white dark:bg-slate-700 dark:hover:bg-slate-600"
